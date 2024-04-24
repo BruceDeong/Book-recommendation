@@ -1,3 +1,5 @@
+import json
+
 class BookGraph:
     def __init__(self):
         self.nodes = {}
@@ -59,3 +61,13 @@ class BookGraph:
                 book_graph.add_edge(book1, book2, weight)
 
     return book_graph
+    
+    def save_book_graph(book_graph, filename="book_graph.json"):
+    data = {
+        "nodes": [{"title": book.title, "author": book.author} for book in book_graph.nodes.values()],
+        "edges": [{"source": book1, "target": book2, "weight": weight}
+                  for book1, neighbors in book_graph.edges.items()
+                  for book2, weight in neighbors.items()]
+    }
+    with open(filename, "w") as file:
+        json.dump(data, file, indent=2)
