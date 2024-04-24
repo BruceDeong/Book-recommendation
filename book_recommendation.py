@@ -1,7 +1,8 @@
 import requests
 import json
-
-
+import networkx as nx
+import matplotlib.pyplot as plt
+import scipy
 class Book:
     def __init__(self, title, author, year, genres, summary):
         self.title = title
@@ -9,7 +10,6 @@ class Book:
         self.year = year
         self.genres = genres
         self.summary = summary
-
 
 class BookGraph:
     def __init__(self):
@@ -88,6 +88,7 @@ def fetch_book_data(query, limit=50):
         books.append(book)
 
         print(f"- {title} by {author}")
+        print()  # Add an empty line to separate different books
 
     return books
 
@@ -96,6 +97,7 @@ def build_book_graph(books):
 
     for book in books:
         book_graph.add_book(book)
+        print(f"Added book node: {book.title}")
 
     for i in range(len(books)):
         for j in range(i + 1, len(books)):
@@ -105,9 +107,43 @@ def build_book_graph(books):
             if len(common_genres) > 0:
                 weight = len(common_genres) / (len(book1.genres) + len(book2.genres))
                 book_graph.add_edge(book1, book2, weight)
+                print(f"Added edge: {book1.title} -- {book2.title} (weight: {weight})")
+
+    print("\nBook Graph:")
+    print(f"Number of nodes: {len(book_graph.nodes)}")
+    print(f"Number of edges: {sum(len(edges) for edges in book_graph.edges.values())}")
+
+    # Print adjacency list representation of the graph
+    print("\nAdjacency List:")
+    for book, neighbors in book_graph.edges.items():
+        print(f"{book}: {neighbors}")
 
     return book_graph
 
+def visualize_book_graph(book_graph, max_nodes=20):
+    G = nx.Graph()
+
+    # 选择要显示的节点
+    nodes_to_show = sorted(book_graph.nodes.items(), key=lambda x: len(book_graph.edges.get(x[0], [])), reverse=True)[:max_nodes]
+
+    for book_title, book in nodes_to_show:
+        G.add_node(book_title)
+
+    for book1, neighbors in book_graph.edges.items():
+        if book1 in dict(nodes_to_show):
+            for book2, weight in neighbors.items():
+                if book2 in dict(nodes_to_show):
+                    G.add_edge(book1, book2, weight=weight)
+
+    pos = nx.kamada_kawai_layout(G)
+    nx.draw_networkx_nodes(G, pos, node_size=1000)
+    nx.draw_networkx_labels(G, pos, font_size=16)
+    nx.draw_networkx_edges(G, pos, width=1)
+
+    plt.figure(figsize=(12, 12))
+    plt.axis("off")
+    plt.title("Book Recommendation Graph", fontsize=20)
+    plt.show()
 
 def get_user_interests():
     print("Enter your interests (keywords or phrases).")
@@ -121,7 +157,6 @@ def get_user_interests():
         user_interests.append(interest)
 
     return user_interests
-
 
 def get_recommendations(book_graph, user_interests, num_recommendations=10):
     recommendations = set()
@@ -145,7 +180,6 @@ def get_recommendations(book_graph, user_interests, num_recommendations=10):
 
     return final_recommendations[:num_recommendations]
 
-
 # Get user interests
 user_interests = get_user_interests()
 
@@ -157,9 +191,13 @@ for interest in user_interests:
 # Build book graph
 book_graph = build_book_graph(books)
 
+# Visualize the book graph
+visualize_book_graph(book_graph)
+
 # Generate recommendations based on user interests
 recommendations = get_recommendations(book_graph, user_interests)
 
 print("\nRecommendations based on your interests:")
 for book in recommendations:
     print(f"- {book.title} by {book.author}")
+print()  # Add an empty line to separate recommendations
