@@ -123,7 +123,6 @@ def build_book_graph(books):
 def visualize_book_graph(book_graph, max_nodes=20):
     G = nx.Graph()
 
-    # 选择要显示的节点
     nodes_to_show = sorted(book_graph.nodes.items(), key=lambda x: len(book_graph.edges.get(x[0], [])), reverse=True)[:max_nodes]
 
     for book_title, book in nodes_to_show:
