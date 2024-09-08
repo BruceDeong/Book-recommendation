@@ -2,7 +2,7 @@
 
 This project is a book recommendation system that utilizes the OpenLibrary API to fetch book data and provide personalized recommendations based on user preferences.
 
-## Special Instructions
+## Instructions
 - The project requires an internet connection to access the OpenLibrary API.
 - No API key is needed to access the OpenLibrary API.
 
